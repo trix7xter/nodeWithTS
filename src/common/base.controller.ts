@@ -33,8 +33,10 @@ export abstract class BaseController {
 	protected bindRouters(routers: IControllerRoute[]): void {
 		for (const router of routers) {
 			this.logger.log(`Binding router ${router.method.toUpperCase()} ${router.path}`);
+			const middleware = router.middlewares?.map((m) => m.execute.bind(m));
 			const handler = router.function.bind(this);
-			this.router[router.method](router.path, handler);
+			const pipeline = middleware ? [...middleware, handler] : handler;
+			this.router[router.method](router.path, pipeline);
 		}
 	}
 }
